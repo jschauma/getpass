@@ -1,5 +1,8 @@
 # getpass - a Go module to get a password
 
+[![Go
+Reference](https://pkg.go.dev/badge/github.com/jschauma/getpass.svg)](https://pkg.go.dev/github.com/jschauma/getpass)
+
 The `getpass` module provides a simple way to retrieve a password from
 the user by specifying a number of different password sources:
 
