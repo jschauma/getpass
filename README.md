@@ -4,6 +4,14 @@ The `getpass` module provides a simple way to retrieve
 a password from the user by specifying a number of
 different password sources:
 
+```
+func Getpass(passfrom, prompt string) (pass string, err error)
+```
+
+Getpass retrieves a password from the user using a
+method defined by the `passfrom` string.  The
+following methods are supported:
+
 `env:var` -- Obtain the password from the environment variable var.
 Since the environment of other processes may be visible
 via e.g. ps(1), this option should be used with caution.
@@ -29,8 +37,11 @@ into the shell history file, this form should only be
 used where security is not important.
 
 If no password retrieval method is specified, then
-`getpass.Getpass` will prompt the user on the
-controlling tty using the provided prompt.
+`Getpass` will prompt the user on the controlling tty
+using the provided `prompt`.
+
+If no `prompt` is provided, then `Getpass` will use
+"Password: ".
 
 See also:
 * https://www.netmeister.org/blog/passing-passwords.html
