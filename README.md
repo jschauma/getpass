@@ -116,3 +116,4 @@ func main() {
 
 See also:
 * https://www.netmeister.org/blog/passing-passwords.html
+* https://www.netmeister.org/blog/consistent-tools.html#passwords
