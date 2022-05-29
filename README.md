@@ -85,7 +85,7 @@ func main() {
 	}
 
 	// Using a custom prompt:
-	p, err = getpass.Getpass("tty", "Please enter your secret passphrase: ")
+	p, err = getpass.Getpass("tty:Please enter your secret passphrase: ")
 	if err != nil {
 		log.Fatal("Unable to get password from user: ", err)
 	} else {
