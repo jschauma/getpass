@@ -58,9 +58,9 @@ import (
 //                 the controlling tty using  the provided `prompt`.  If no
 //                 `prompt` is provided, then `Getpass` will use "Password: ".
 //
-// If no password retrieval method is specified, then
-// Getpass will prompt the user on the controlling tty
-// using the provided prompt.
+// This function is variadic purely so that you can invoke it without any
+// arguments, thereby defaulting to interactively providing the password
+// as if 'passfrom' was set to "tty:Password: ".
 func Getpass(passfrom ...string) (pass string, err error) {
 	var passin []string
 	source := "tty"
