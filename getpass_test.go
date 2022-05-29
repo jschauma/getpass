@@ -52,6 +52,24 @@ func TestGetpassPass(t *testing.T) {
 	}
 }
 
+// TestGetpassPass tests that Getpass with a passfrom set to 'cmd:'
+// executes the given command with full shell evaluation..
+func TestGetpassCmd(t *testing.T) {
+	want := os.Getenv("PATH")
+	cmd := "echo $PATH"
+	p, err := Getpass("cmd:" + cmd)
+	if err != nil || p != want {
+		t.Fatalf(`Getpass("cmd:%s") = %q, %v, want %s, nil`, cmd, p, err, want)
+	}
+
+	want = "/dev/null"
+	cmd = "ls -l /dev/null | awk '{print $NF}'"
+	p, err = Getpass("cmd:" + cmd)
+	if err != nil || p != want {
+		t.Fatalf(`Getpass("cmd:%s") = %q, %v, want %s, nil`, cmd, p, err, want)
+	}
+}
+
 // TestGetpassFail tests that Getpass with an invalid
 // passfrom fails.
 func TestGetpassFail(t *testing.T) {

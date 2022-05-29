@@ -4,11 +4,15 @@ The `getpass` module provides a simple way to retrieve a password from
 the user by specifying a number of different password sources:
 
 ```
-func Getpass(passfrom) (pass string, err error)
+func Getpass(passfrom string) (pass string, err error)
 ```
 
 Getpass retrieves a password from the user using a method defined by
 the `passfrom` string.  The following methods are supported:
+
+`cmd:command` -- Obtain the password by running the given command.  The
+command will be passed to the shell for execution via "/bin/sh -c
+'command'".
 
 `env:var` -- Obtain the password from the environment variable var.
 Since the environment of other processes may be visible
@@ -78,7 +82,7 @@ func main() {
 	}
 
 	// Using a custom prompt:
-	p, err = getpass.Getpass("tty:Please enter your secret passphrase: ")
+	p, err = getpass.Getpass("tty", "Please enter your secret passphrase: ")
 	if err != nil {
 		log.Fatal("Unable to get password from user: %v\n", err)
 	} else {

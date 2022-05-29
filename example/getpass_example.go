@@ -57,5 +57,12 @@ func main() {
 		fmt.Printf("%s\n", p)
 	}
 
+	// Using a command:
+	p, err = getpass.Getpass("cmd:env | grep -i mysecret")
+	if err != nil {
+		log.Fatal("Unable to get password from user: ", err)
+	} else {
+		fmt.Printf("%s\n", p)
+	}
 	// etc. etc.
 }

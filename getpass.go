@@ -15,17 +15,20 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"os/user"
 	"os/signal"
+	"os/user"
 	"regexp"
 	"runtime"
 	"strings"
 	"syscall"
 )
 
-// Getpass retrieves a password from the user using a
-// method defined by the 'passfrom' string.  The
-// following methods are supported:
+// Getpass retrieves a password from the user using a method defined by
+// the 'passfrom' string.  The following methods are supported:
+//
+//  cmd:command    Obtain the password by running the given command.
+//                 The command will be passed to the shell for execution
+//                 via "/bin/sh -c 'command'".
 //
 //  env:var        Obtain the password from the environment variable var.
 //                 Since the environment of other processes may be visible
@@ -77,6 +80,8 @@ func Getpass(passfrom ...string) (pass string, err error) {
 	}
 
 	switch source {
+	case "cmd":
+		return getpassFromCommand(passin[1])
 	case "env":
 		return getpassFromEnv(passin[1])
 	case "file":
@@ -103,6 +108,15 @@ func Getpass(passfrom ...string) (pass string, err error) {
 	}
 
 	return pass, nil
+}
+
+func getpassFromCommand(command string) (pass string, err error) {
+	cmd := []string{"/bin/sh", "-c", command}
+	out, err := runCommand(cmd, "", true)
+	if err != nil {
+		return "", err
+	}
+	return out, nil
 }
 
 func getpassFromEnv(varname string) (pass string, err error) {
