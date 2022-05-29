@@ -15,7 +15,9 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"os/user"
 	"os/signal"
+	"regexp"
 	"runtime"
 	"strings"
 	"syscall"
@@ -52,15 +54,31 @@ import (
 // If no password retrieval method is specified, then
 // Getpass will prompt the user on the controlling tty
 // using the provided prompt.
-func Getpass(passfrom, prompt string) (pass string, err error) {
+func Getpass(args ...string) (pass string, err error) {
 	var source string
+	var passfrom string
 	var passin []string
+
+	if len(args) > 2 {
+		return "", errors.New("invalid number of arguments to Getpass")
+	}
+
+
+	if len(args) > 0 {
+		passfrom = args[0]
+	}
+
+	prompt := "Password: "
+	if len(args) > 1 {
+		prompt = args[1]
+	}
+
 	errMsg := "invalid password source"
 	if len(passfrom) == 0 {
 		source = "tty"
 	} else {
 		passin = strings.SplitN(passfrom, ":", 2)
-		if len(passin) < 2 {
+		if len(passin) < 2 && passfrom != "tty" {
 			return "", errors.New(errMsg)
 		}
 		source = passin[0]
@@ -102,6 +120,30 @@ func getpassFromEnv(varname string) (pass string, err error) {
 }
 
 func getpassFromFile(fname string) (pass string, err error) {
+	r := regexp.MustCompile(`^~([^/]+)?/`)
+	m := r.FindStringSubmatch(fname)
+	if len(m) > 0 {
+		var u *user.User
+		if len(m[1]) > 0 {
+			uname := m[1]
+			tmp, err := user.Lookup(uname)
+			if err == nil {
+				u = tmp
+			}
+		} else {
+			u, err = user.Current()
+			if err != nil {
+				return "", err
+			}
+		}
+
+		if u != nil {
+			fname = u.HomeDir + fname[strings.Index(fname, "/"):]
+		}
+	}
+
+	fname = os.ExpandEnv(fname)
+
 	file, err := os.Open(fname)
 	if err != nil {
 		errMsg := fmt.Sprintf("Unable to open '%s': %v", fname, err)
@@ -111,6 +153,8 @@ func getpassFromFile(fname string) (pass string, err error) {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		pass = scanner.Text()
+		/* We only grab the first line. */
+		break
 	}
 
 	return pass, nil
@@ -147,10 +191,6 @@ func getpassFromUser(prompt string) (pass string, err error) {
 	dev_tty, err := os.OpenFile("/dev/tty", os.O_RDWR, 0)
 	if err != nil {
 		return "", err
-	}
-
-	if len(prompt) < 1 {
-		prompt = "Password: "
 	}
 
 	fmt.Fprintf(dev_tty, prompt)
