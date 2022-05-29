@@ -42,7 +42,7 @@ password is visible to utilities such as `ps(1)` and possibly leaked
 into the shell history file, this form should only be used where
 security is not important.
 
-`tty` -- This is the default: `Getpass` `Getpass` will prompt the user on
+`tty` -- This is the default: `Getpass` will prompt the user on
 the controlling tty using the provided `prompt`.  If no `prompt` is
 provided, then `Getpass` will use "Password: ".
 
