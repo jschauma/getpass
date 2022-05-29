@@ -13,9 +13,9 @@ import (
 func TestGetpassEnv(t *testing.T) {
 	want := "password"
 	_ = os.Setenv("GETPASS", want)
-	p, err := Getpass("env:GETPASS", "")
+	p, err := Getpass("env:GETPASS")
 	if err != nil || p != want {
-		t.Fatalf(`Getpass("env:GETPASS", "") = %q, %v, want %s, nil`, p, err, want)
+		t.Fatalf(`Getpass("env:GETPASS") = %q, %v, want %s, nil`, p, err, want)
 	}
 }
 
@@ -37,26 +37,26 @@ func TestGetpassFile(t *testing.T) {
 	}
 
 	passin := "file:" + tmpfile.Name()
-	p, err := Getpass(passin, "")
+	p, err := Getpass(passin)
 	if err != nil || p != "password" {
-		t.Fatalf(`Getpass("%s", "") = %q, %v, want password, nil`, passin, p, err)
+		t.Fatalf(`Getpass("%s") = %q, %v, want password, nil`, passin, p, err)
 	}
 }
 
 // TestGetpassPass tests that Getpass with a passfrom
 // set to 'pass:password' returns 'password'.
 func TestGetpassPass(t *testing.T) {
-	p, err := Getpass("pass:password", "")
+	p, err := Getpass("pass:password")
 	if err != nil || p != "password" {
-		t.Fatalf(`Getpass("pass:password", "") = %q, %v, want password, nil`, p, err)
+		t.Fatalf(`Getpass("pass:password") = %q, %v, want password, nil`, p, err)
 	}
 }
 
 // TestGetpassFail tests that Getpass with an invalid
 // passfrom fails.
 func TestGetpassFail(t *testing.T) {
-	p, err := Getpass("whatever:invalid", "")
+	p, err := Getpass("whatever:invalid")
 	if err == nil || p != "" {
-		t.Fatalf(`Getpass("whatever:invalid", "") = %q, %v, want "", error`, p, err)
+		t.Fatalf(`Getpass("whatever:invalid") = %q, %v, want "", error`, p, err)
 	}
 }

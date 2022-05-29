@@ -4,7 +4,7 @@ The `getpass` module provides a simple way to retrieve a password from
 the user by specifying a number of different password sources:
 
 ```
-func Getpass(passfrom, prompt string) (pass string, err error)
+func Getpass(passfrom) (pass string, err error)
 ```
 
 Getpass retrieves a password from the user using a method defined by
@@ -35,11 +35,9 @@ password is visible to utilities such as ps(1) and possibly leaked
 into the shell history file, this form should only be used where
 security is not important.
 
-`tty` -- This is the default if no `passfrom` method is specified:
-`Getpass` `Getpass` will prompt the user on the controlling tty using
-the provided `prompt`.
-
-If no `prompt` is provided, then `Getpass` will use "Password: ".
+`tty` -- This is the default: `Getpass` `Getpass` will prompt the user on
+the controlling tty using the provided `prompt`.  If no `prompt` is
+provided, then `Getpass` will use "Password: ".
 
 ## Examples
 
@@ -80,7 +78,7 @@ func main() {
 	}
 
 	// Using a custom prompt:
-	p, err = getpass.Getpass("tty", "Please enter your secret passphrase: ")
+	p, err = getpass.Getpass("tty:Please enter your secret passphrase: ")
 	if err != nil {
 		log.Fatal("Unable to get password from user: %v\n", err)
 	} else {

@@ -51,34 +51,26 @@ import (
 //                 into the shell history file, this form should only be
 //                 used where security is not important.
 //
+//  tty:prompt     This is the default: `Getpass` will prompt the user on
+//                 the controlling tty using  the provided `prompt`.  If no
+//                 `prompt` is provided, then `Getpass` will use "Password: ".
+//
 // If no password retrieval method is specified, then
 // Getpass will prompt the user on the controlling tty
 // using the provided prompt.
-func Getpass(args ...string) (pass string, err error) {
-	var source string
-	var passfrom string
+func Getpass(passfrom ...string) (pass string, err error) {
 	var passin []string
-
-	if len(args) > 2 {
-		return "", errors.New("invalid number of arguments to Getpass")
-	}
-
-
-	if len(args) > 0 {
-		passfrom = args[0]
-	}
-
+	source := "tty"
 	prompt := "Password: "
-	if len(args) > 1 {
-		prompt = args[1]
+
+	if len(passfrom) > 1 {
+		return "", errors.New("invalid number of arguments for Getpass")
 	}
 
 	errMsg := "invalid password source"
-	if len(passfrom) == 0 {
-		source = "tty"
-	} else {
-		passin = strings.SplitN(passfrom, ":", 2)
-		if len(passin) < 2 && passfrom != "tty" {
+	if len(passfrom) > 0 {
+		passin = strings.SplitN(passfrom[0], ":", 2)
+		if len(passin) < 2 && passfrom[0] != "tty" {
 			return "", errors.New(errMsg)
 		}
 		source = passin[0]
@@ -102,6 +94,9 @@ func Getpass(args ...string) (pass string, err error) {
 	case "pass":
 		return passin[1], nil
 	case "tty":
+		if len(passin) == 2 {
+			prompt = passin[1]
+		}
 		return getpassFromUser(prompt)
 	default:
 		return "", errors.New(errMsg)
