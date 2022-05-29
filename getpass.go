@@ -149,6 +149,10 @@ func getpassFromUser(prompt string) (pass string, err error) {
 		return "", err
 	}
 
+	if len(prompt) < 1 {
+		prompt = "Password: "
+	}
+
 	fmt.Fprintf(dev_tty, prompt)
 
 	c := make(chan os.Signal, 1)
