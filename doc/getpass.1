@@ -1,0 +1,155 @@
+.\" Copyright (c) 2023, Jan Schaumann
+.\" Author: Jan Schaumann <jschauma@netmeister.org>
+.\" https://github.com/jschauma/getpass
+.\"
+.Dd July 17, 2023
+.Dt GETPASS 1
+.Os
+.Sh NAME
+.Nm getpass
+.Nd get a password from the user
+.Sh SYNOPSIS
+.Nm
+.Op Fl Vh
+.Op Ar passin
+.Sh DESCRIPTION
+The
+.Nm
+tool provides a simple way to retrieve a password from
+the user by specifying a number of different password
+sources.
+The password is then printed to stdout.
+.Sh OPTIONS
+The following options are supported by
+.Nm :
+.Bl -tag -width _p_passin_
+.It Fl V
+Print version number and exit.
+.It Fl h
+Print a short help message and exit.
+.Sh DETAILS
+Writing shell scripts that interact with different
+commands that require a password is often
+cumbersome:
+Many tools require a password to run, but may only
+implement limited or inconsistent ways to provide the
+password.
+.Pp
+The
+.Nm
+tool can be used to retrieve a password from the user
+in several ways, carrying different methods carry
+different risks, and you should carefully evaluate
+what may be the best option for you.
+.Pp
+The supported options for the
+.Ar passin
+argument are:
+.Bl -tag -width pass_password_
+.It \fBenv:var\fR
+Obtain the password from the environment variable \fBvar\fR.
+Since the environment of other processes may be visible via e.g.
+.Xr ps 1 ,
+this option should be used with caution.
+.It \fBfile:pathname\fR
+The first line of \fBpathname\fR is the password.
+\fBpathname\fR need not refer to a regular file: it could for example
+refer to a device or named pipe.
+Note that standard Unix file access controls should be used to protect
+this file.
+.It \fBfd:num\fR
+Read the password from the given file descriptor.
+The file descriptor must have been opened before
+invoking
+.Nm
+and the shell must allow subprocesses to inherit open
+file descriptors ('set -o posix' for e.g., bourne
+shells).
+.Pp
+Note that on many platforms this is functionally
+equivalent to 'file:/proc/$$/fd/num'.
+.It \fBkeychain:name\fR
+.Nm
+will use the
+.Xr security 1
+utility to retrieve the password from the macOS keychain.
+.It \fBlpass:name\fR
+.Nm
+will use the LastPass command-line client
+.Xr lpass 1
+to retrieve the named password.
+You should previously have run 'lpass login' for this
+to work.
+.It \fBop:name\fR
+.Nm
+will use the 1Password command-line client
+.Xr op 1
+to retrieve the named password.
+.It \fBpass:password\fR
+The actual password is \fBpassword\fR.
+Since the password is visible to utilities such as
+.Xr ps 1
+this form should only be used where security is not important.
+.It \fBstdin\fR
+Read the password from stdin. This is actually a
+convenience alias for 'fd:0'; on many platforms the same
+effect can be achieved via 'file:/dev/stdin'.
+.It \fBtty[:prompt]\fR
+This is the default: Getpass will prompt the user on
+the controlling tty using the provided prompt.
+If no prompt is provided, then Getpass will use
+"Password: ".
+.El
+.Sh EXAMPLES
+The primary use case for
+.Nm
+is to pass a password to another process.
+For example, assume that the command
+.Ar cmd
+only accepts a password on the command-line, but you
+want to retrieve it from the macOS keychain entry
+"mypass":
+.Bd -literal -offset indent
+$ cmd -p $(getpass keychain:mypass)
+.Ed
+.Pp
+Note: since the subshell is evaluated prior to the
+execution of
+.Ar cmd
+the password is now present in the process table.
+.Pp
+To allow your
+.Xr sudo 8
+password to be fetched from your 1Password vault,
+create a
+.Ev SSH_ASKPASS
+wrapper using
+.Nm :
+.Bd -literal -offset indent
+$ cat >${HOME}/bin/askpass <<EOF
+#! /bin/sh
+getpass op:sudo
+EOF
+$ chmod a+rx ${HOME}/bin/askpass
+$ export SSH_ASKPASS=${HOME}/bin/askpass
+$ sudo -A command
+.Ed
+.Pp
+To non-interactively provide a password from your
+LastPass vault to a tool that only accepts a password
+on stdin:
+.Bd -literal -offset indent
+$ getpass lpass:extra-secret | cmd --password-stdin
+.Ed
+.Sh SEE ALSO
+.Xr lpass 1 ,
+.Xr security 1 ,
+.Xr sudo 8
+.Pp
+https://www.netmeister.org/blog/passing-passwords.html
+.Sh HISTORY
+.Nm
+was originally written by
+.An Jan Schaumann
+.Aq jschauma@netmeister.org
+in July 2023.

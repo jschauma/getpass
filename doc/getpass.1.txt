@@ -1,0 +1,107 @@
+GETPASS(1)		     General Commands Manual		      GETPASS(1)
+
+NAME
+     getpass  get a password from the user
+
+SYNOPSIS
+     getpass [-Vh] [passin]
+
+DESCRIPTION
+     The getpass tool provides a simple way to retrieve a password from the user
+     by specifying a number of different password sources.  The password is then
+     printed to stdout.
+
+OPTIONS
+     The following options are supported by getpass:
+
+     -V		 Print version number and exit.
+
+     -h		 Print a short help message and exit.
+
+DETAILS
+     Writing shell scripts that interact with different commands that require a
+     password is often cumbersome: Many tools require a password to run, but may
+     only implement limited or inconsistent ways to provide the password.
+
+     The getpass tool can be used to retrieve a password from the user in
+     several ways, carrying different methods carry different risks, and you
+     should carefully evaluate what may be the best option for you.
+
+     The supported options for the passin argument are:
+
+     env:var	     Obtain the password from the environment variable var.
+		     Since the environment of other processes may be visible via
+		     e.g.  ps(1), this option should be used with caution.
+
+     file:pathname   The first line of pathname is the password.  pathname need
+		     not refer to a regular file: it could for example refer to
+		     a device or named pipe.  Note that standard Unix file
+		     access controls should be used to protect this file.
+
+     fd:num	     Read the password from the given file descriptor.	The file
+		     descriptor must have been opened before invoking getpass
+		     and the shell must allow subprocesses to inherit open file
+		     descriptors ('set -o posix' for e.g., bourne shells).
+
+		     Note that on many platforms this is functionally equivalent
+		     to 'file:/proc/$$/fd/num'.
+
+     keychain:name   getpass will use the security(1) utility to retrieve the
+		     password from the macOS keychain.
+
+     lpass:name	     getpass will use the LastPass command-line client lpass(1)
+		     to retrieve the named password.  You should previously have
+		     run 'lpass login' for this to work.
+
+     op:name	     getpass will use the 1Password command-line client op(1) to
+		     retrieve the named password.
+
+     pass:password   The actual password is password.  Since the password is
+		     visible to utilities such as ps(1) this form should only be
+		     used where security is not important.
+
+     stdin	     Read the password from stdin. This is actually a
+		     convenience alias for 'fd:0'; on many platforms the same
+		     effect can be achieved via 'file:/dev/stdin'.
+
+     tty[:prompt]    This is the default: Getpass will prompt the user on the
+		     controlling tty using the provided prompt.	 If no prompt is
+		     provided, then Getpass will use "Password: ".
+
+EXAMPLES
+     The primary use case for getpass is to pass a password to another process.
+     For example, assume that the command cmd only accepts a password on the
+     command-line, but you want to retrieve it from the macOS keychain entry
+     "mypass":
+
+	   $ cmd -p $(getpass keychain:mypass)
+
+     Note: since the subshell is evaluated prior to the execution of cmd the
+     password is now present in the process table.
+
+     To allow your sudo(8) password to be fetched from your 1Password vault,
+     create a SSH_ASKPASS wrapper using getpass:
+
+	   $ cat >${HOME}/bin/askpass <<EOF
+	   #! /bin/sh
+	   getpass op:sudo
+	   EOF
+	   $ chmod a+rx ${HOME}/bin/askpass
+	   $ export SSH_ASKPASS=${HOME}/bin/askpass
+	   $ sudo -A command
+
+     To non-interactively provide a password from your LastPass vault to a tool
+     that only accepts a password on stdin:
+
+	   $ getpass lpass:extra-secret | cmd --password-stdin
+
+SEE ALSO
+     lpass(1), security(1), sudo(8)
+
+     https://www.netmeister.org/blog/passing-passwords.html
+
+HISTORY
+     getpass was originally written by Jan Schaumann jschauma@netmeister.org
+     in July 2023.
+
+NetBSD 9.3			  July 17, 2023			      NetBSD 9.3

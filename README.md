@@ -4,7 +4,15 @@
 Reference](https://pkg.go.dev/badge/github.com/jschauma/getpass.svg)](https://pkg.go.dev/github.com/jschauma/getpass)
 
 The `getpass` module provides a simple way to retrieve a password from
-the user by specifying a number of different password sources:
+the user by specifying a number of different password sources.
+
+A simple command-line tool using this function to
+provide a generic helper command is also provided in
+this directory.  Please see the [manual
+page](https://github.com/jschauma/getpass/blob/main/doc/getpass.1.txt) for
+details.
+
+---
 
 ```
 func Getpass(passfrom string) (pass string, err error)

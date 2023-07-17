@@ -27,45 +27,45 @@ import (
 // Getpass retrieves a password from the user using a method defined by
 // the 'passfrom' string.  The following methods are supported:
 //
-//  cmd:command    Obtain the password by running the given command.
-//                 The command will be passed to the shell for execution
-//                 via "/bin/sh -c 'command'".
+//	cmd:command    Obtain the password by running the given command.
+//	               The command will be passed to the shell for execution
+//	               via "/bin/sh -c 'command'".
 //
-//  env:var        Obtain the password from the environment variable var.
-//                 Since the environment of other processes may be visible
-//                 via e.g. ps(1), this option should be used with caution.
+//	env:var        Obtain the password from the environment variable var.
+//	               Since the environment of other processes may be visible
+//	               via e.g. ps(1), this option should be used with caution.
 //
-//  fd:num         Obtain the password from the given file descriptor.
-//                 Note that on many platforms this is functionally equivalent
-//                 to `file:/proc/$$/fd/num`.
+//	fd:num         Obtain the password from the given file descriptor.
+//	               Note that on many platforms this is functionally equivalent
+//	               to `file:/proc/$$/fd/num`.
 //
-//  file:pathname  The first line of pathname is the password.  pathname need
-//                 not refer to a regular file: it could for example refer to
-//                 a device or named pipe.  Note that standard Unix file
-//                 access controls should be used to protect this file.
+//	file:pathname  The first line of pathname is the password.  pathname need
+//	               not refer to a regular file: it could for example refer to
+//	               a device or named pipe.  Note that standard Unix file
+//	               access controls should be used to protect this file.
 //
-//  keychain:name  Use the security(1) utility to retrieve the
-//                 password from the macOS keychain.
+//	keychain:name  Use the security(1) utility to retrieve the
+//	               password from the macOS keychain.
 //
-//  lpass:name     Use the LastPass command-line client lpass(1) to
-//                 retrieve the named password.  You should previously have
-//                 run 'lpass login' for this to work.
+//	lpass:name     Use the LastPass command-line client lpass(1) to
+//	               retrieve the named password.  You should previously have
+//	               run 'lpass login' for this to work.
 //
-//  op:name        Use the 1Password command-line client op(1) to
-//                 retrieve the named password.
+//	op:name        Use the 1Password command-line client op(1) to
+//	               retrieve the named password.
 //
-//  pass:password  The actual password is password.  Since the password is
-//                 visible to utilities such as ps(1) and possibly leaked
-//                 into the shell history file, this form should only be
-//                 used where security is not important.
+//	pass:password  The actual password is password.  Since the password is
+//	               visible to utilities such as ps(1) and possibly leaked
+//	               into the shell history file, this form should only be
+//	               used where security is not important.
 //
-//  stdin          Read the password from stdin.  This is actually a
-//                 convenience alias for `fd:0`; on many platforms the same
-//                 effect can be achieved via `file:/dev/stdin`.
+//	stdin          Read the password from stdin.  This is actually a
+//	               convenience alias for `fd:0`; on many platforms the same
+//	               effect can be achieved via `file:/dev/stdin`.
 //
-//  tty:prompt     This is the default: `Getpass` will prompt the user on
-//                 the controlling tty using  the provided `prompt`.  If no
-//                 `prompt` is provided, then `Getpass` will use "Password: ".
+//	tty:prompt     This is the default: `Getpass` will prompt the user on
+//	               the controlling tty using  the provided `prompt`.  If no
+//	               `prompt` is provided, then `Getpass` will use "Password: ".
 //
 // This function is variadic purely so that you can invoke it without any
 // arguments, thereby defaulting to interactively providing the password
