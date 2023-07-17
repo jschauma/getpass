@@ -1,7 +1,8 @@
 package getpass
 
 import (
-	"io/ioutil"
+	"fmt"
+	"io"
 	"log"
 	"os"
 	"testing"
@@ -19,10 +20,36 @@ func TestGetpassEnv(t *testing.T) {
 	}
 }
 
+// TestGetPassFd opens a temporary file and verifies
+// that it can read from the resulting file
+// descriptor.
+func TestGetpassFd(t *testing.T) {
+	tmpfile, err := os.CreateTemp("", "getpass")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove(tmpfile.Name())
+
+	if _, err := tmpfile.Write([]byte("password\n")); err != nil {
+		log.Fatal(err)
+	}
+
+	if _, err := tmpfile.Seek(0, io.SeekStart); err != nil {
+		log.Fatal(err)
+	}
+
+	fd := os.NewFile(uintptr(tmpfile.Fd()), "fd")
+	passin := fmt.Sprintf("fd:%d", fd.Fd())
+	p, err := Getpass(passin)
+	if err != nil || p != "password" {
+		t.Fatalf(`Getpass("%s") = %q, %v, want password, nil`, passin, p, err)
+	}
+}
+
 // TestGetpassFile tests that Getpass can get a
 // password from a file.
 func TestGetpassFile(t *testing.T) {
-	tmpfile, err := ioutil.TempFile("", "getpass")
+	tmpfile, err := os.CreateTemp("", "getpass")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -55,11 +82,11 @@ func TestGetpassPass(t *testing.T) {
 // TestGetpassPass tests that Getpass with a passfrom set to 'cmd:'
 // executes the given command with full shell evaluation..
 func TestGetpassCmd(t *testing.T) {
-	want := os.Getenv("PATH")
-	cmd := "echo $PATH"
+	want := os.Getenv("USER")
+	cmd := "echo $USER"
 	p, err := Getpass("cmd:" + cmd)
 	if err != nil || p != want {
-		t.Fatalf(`Getpass("cmd:%s") = %q, %v, want %s, nil`, cmd, p, err, want)
+		t.Fatalf(`Getpass("cmd:%s") = |%q|, %v, want |%s|, nil`, cmd, p, err, want)
 	}
 
 	want = "/dev/null"

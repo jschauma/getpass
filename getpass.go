@@ -19,6 +19,7 @@ import (
 	"os/user"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 	"syscall"
 )
@@ -33,6 +34,10 @@ import (
 //  env:var        Obtain the password from the environment variable var.
 //                 Since the environment of other processes may be visible
 //                 via e.g. ps(1), this option should be used with caution.
+//
+//  fd:num         Obtain the password from the given file descriptor.
+//                 Note that on many platforms this is functionally equivalent
+//                 to `file:/proc/$$/fd/num`.
 //
 //  file:pathname  The first line of pathname is the password.  pathname need
 //                 not refer to a regular file: it could for example refer to
@@ -54,6 +59,10 @@ import (
 //                 into the shell history file, this form should only be
 //                 used where security is not important.
 //
+//  stdin          Read the password from stdin.  This is actually a
+//                 convenience alias for `fd:0`; on many platforms the same
+//                 effect can be achieved via `file:/dev/stdin`.
+//
 //  tty:prompt     This is the default: `Getpass` will prompt the user on
 //                 the controlling tty using  the provided `prompt`.  If no
 //                 `prompt` is provided, then `Getpass` will use "Password: ".
@@ -73,7 +82,7 @@ func Getpass(passfrom ...string) (pass string, err error) {
 	errMsg := "invalid password source"
 	if len(passfrom) > 0 {
 		passin = strings.SplitN(passfrom[0], ":", 2)
-		if len(passin) < 2 && passfrom[0] != "tty" {
+		if len(passin) < 2 && passfrom[0] != "tty" && passfrom[0] != "stdin" {
 			return "", errors.New(errMsg)
 		}
 		source = passin[0]
@@ -84,6 +93,8 @@ func Getpass(passfrom ...string) (pass string, err error) {
 		return getpassFromCommand(passin[1])
 	case "env":
 		return getpassFromEnv(passin[1])
+	case "fd":
+		return getpassFromFd(passin[1])
 	case "file":
 		return getpassFromFile(passin[1])
 	case "keychain":
@@ -98,6 +109,11 @@ func Getpass(passfrom ...string) (pass string, err error) {
 		return getpassFromOnepass(passin[1])
 	case "pass":
 		return passin[1], nil
+	case "stdin":
+		if len(passin) > 1 {
+			return "", errors.New("'stdin' takes no argument")
+		}
+		return getpassFromFd("0")
 	case "tty":
 		if len(passin) == 2 {
 			prompt = passin[1]
@@ -125,6 +141,25 @@ func getpassFromEnv(varname string) (pass string, err error) {
 	if len(pass) < 1 {
 		return "", errors.New(errMsg)
 	}
+	return pass, nil
+}
+
+func getpassFromFd(fnum string) (pass string, err error) {
+	i, err := strconv.Atoi(fnum)
+	if err != nil {
+		return "", errors.New("invalid file descriptor")
+	}
+	fd := os.NewFile(uintptr(i), "fd")
+	if fd == nil {
+		return "", errors.New("unable to open fd")
+	}
+	scanner := bufio.NewScanner(fd)
+	for scanner.Scan() {
+		pass = scanner.Text()
+		/* We only grab the first line. */
+		break
+	}
+
 	return pass, nil
 }
 

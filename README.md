@@ -21,6 +21,10 @@ command will be passed to the shell for execution via `/bin/sh -c
 Since the environment of other processes may be visible
 via e.g. `ps(1)`, this option should be used with caution.
 
+`fd:num` -- Obtain the password from the given file
+descriptor.  Note that on many platforms this is
+functionally equivalent to `file:/proc/$$/fd/num`.
+
 `file:pathname` -- The first line of `pathname` is the password.
 `pathname` need not refer to a regular file: it could for example refer
 to a device or named pipe.  `pathname` undergoes standard "~" and
@@ -41,6 +45,10 @@ the named password.
 password is visible to utilities such as `ps(1)` and possibly leaked
 into the shell history file, this form should only be used where
 security is not important.
+
+`stdin` -- Read the password from stdin.  This is actually a convenience
+alias for `fd:0`; on many platforms the same effect can be achieved via
+`file:/dev/stdin`.
 
 `tty[:prompt]` -- This is the default: `Getpass` will prompt the user on
 the controlling tty using the provided `prompt`.  If no `prompt` is
