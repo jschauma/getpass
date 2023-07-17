@@ -12,7 +12,7 @@ import (
 )
 
 const PROGNAME = "getpass"
-const VERSION = "0.2.2"
+const VERSION = "0.2.3"
 
 func usage() {
 	help := `Usage: getpass [-Vh] [passin]
