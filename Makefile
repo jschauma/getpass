@@ -1,10 +1,10 @@
 NAME=    getpass
 PREFIX?= /usr/local
 
-all: ${NAME}
+all: ${NAME}.cmd
 
-${NAME}: ./cmd/${NAME}.go
-	go build cmd/${NAME}.go
+${NAME}.cmd: ./${NAME}/main.go
+	go build -o ${NAME}.cmd ${NAME}/main.go
 
 help:
 	@echo "The following targets are available:"
@@ -16,7 +16,7 @@ help:
 
 install:
 	mkdir -p ${PREFIX}/bin ${PREFIX}/share/man/man1
-	install -c -m 0555 ./${NAME} ${PREFIX}/bin/${NAME}
+	install -c -m 0555 ./${NAME}.cmd ${PREFIX}/bin/${NAME}
 	install -c -m 0444 doc/${NAME}.1 ${PREFIX}/share/man/man1/${NAME}.1
 
 uninstall:
@@ -24,7 +24,7 @@ uninstall:
 	rm -f ${PREFIX}/share/man/man1/${NAME}.1
 
 clean:
-	rm -f ${NAME}
+	rm -f ${NAME}.cmd
 
 doc: doc/${NAME}.1.txt
 
