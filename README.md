@@ -12,6 +12,30 @@ this directory.  Please see the [manual
 page](https://github.com/jschauma/getpass/blob/main/doc/getpass.1.txt) for
 details.
 
+You can install the command-line tool using
+
+```
+go install github.com/jschauma/getpass/getpass@latest
+```
+
+If you prefer to also install the manual page, then
+you can also run:
+
+```
+git clone https://github.com/jschauma/getpass.git
+cd getpass
+make
+sudo make install
+```
+
+The default `PREFIX` location is `/usr/local`; change
+the environment variable to point to a different
+location, if you prefer:
+
+```
+sudo make PREFIX=/some/where/else install
+```
+
 ---
 
 ```
