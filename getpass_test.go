@@ -80,7 +80,7 @@ func TestGetpassPass(t *testing.T) {
 }
 
 // TestGetpassPass tests that Getpass with a passfrom set to 'cmd:'
-// executes the given command with full shell evaluation..
+// executes the given command with full shell evaluation.
 func TestGetpassCmd(t *testing.T) {
 	want := os.Getenv("USER")
 	cmd := "echo $USER"
