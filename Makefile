@@ -12,6 +12,7 @@ help:
 	@echo "clean      remove build files"
 	@echo "doc        format man page into .txt"
 	@echo "install    install ${NAME} into ${PREFIX}"
+	@echo "test       run 'go test'"
 	@echo "uninstall  uninstall ${NAME} from ${PREFIX}"
 
 install:
@@ -22,6 +23,9 @@ install:
 uninstall:
 	rm -f ${PREFIX}/bin/${NAME}
 	rm -f ${PREFIX}/share/man/man1/${NAME}.1
+
+test:
+	go test
 
 clean:
 	rm -f ${NAME}.cmd
